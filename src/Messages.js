@@ -333,8 +333,12 @@ class Messages
   get large_clock() {
     return chrome.i18n.getMessage('large_clock', []);
   }
+// deprecated
   last_9_months(count) {
     return chrome.i18n.getMessage('last_9_months', [count]);
+  }
+  last_12_months(count) {
+    return chrome.i18n.getMessage('last_12_months', [count]);
   }
   get less_than_minute() {
     return chrome.i18n.getMessage('less_than_minute', []);
@@ -692,6 +696,9 @@ class Messages
   }
   get your_history() {
     return chrome.i18n.getMessage('your_history', []);
+  }
+  get cheat_sheet() {
+    return chrome.i18n.getMessage('cheat_sheet', []);
   }
 }
 

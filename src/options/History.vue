@@ -3,12 +3,18 @@
     <div id="sparkline"></div>
     <div class="stats">
       <div class="stat">
-        <div class="value">{{ stats.day | integer }}</div>
+        <div>
+          <div class="value" style="display: contents;">{{ stats.day | integer }}</div>
+          <div class="value" style="display: contents;color: darkgrey;">/12</div>
+        </div>
         <div class="bucket">{{ M.today }}</div>
         <div class="average">{{ stats.dayAverage | float(2) | average_stat }}</div>
       </div>
       <div class="stat">
-        <div class="value">{{ stats.week | integer }}</div>
+        <div>
+          <div class="value" style="display: contents;">{{ stats.week | integer }}</div>
+          <div class="value" style="display: contents;color: darkgrey;">/60</div>
+        </div>
         <div class="bucket">{{ M.this_week }}</div>
         <div class="average">{{ stats.weekAverage | float(2) | average_stat }}</div>
       </div>
@@ -22,7 +28,7 @@
         <div class="bucket">{{ M.total }}</div>
       </div>
     </div>
-    <section class="day-distribution chart">
+    <!-- <section class="day-distribution chart">
       <div class="title">
         <h2>{{ M.daily_distribution }}</h2>
         <div v-if="stats.total > 0" class="options" key="actions">
@@ -38,41 +44,78 @@
       </div>
       <DayDistribution v-if="stats.total > 0" :pomodoros="stats.pomodoros" :bucketSize="dayDistributionBucketSize" key="chart"></DayDistribution>
       <div v-else class="empty" key="empty">{{ M.daily_empty_placeholder }}</div>
-    </section>
-    <section class="chart">
+    </section>-->
+    <!-- <section class="chart">
       <div class="title">
         <h2>{{ M.weekly_distribution }}</h2>
       </div>
       <WeekDistribution v-if="stats.total > 0" :pomodoros="stats.pomodoros" key="chart"></WeekDistribution>
       <div v-else class="empty" key="empty">{{ M.weekly_empty_placeholder }}</div>
-    </section>
+    </section>-->
     <section class="chart">
       <div class="title">
-        <h2>{{ stats.period | pomodoroCount | last_9_months }}</h2>
+        <h2
+          v-if="stats && stats.pomodoros && stats.pomodoros[stats.currentYear] && Object.keys(stats.pomodoros[stats.currentYear]).length"
+        >{{ Object.values(stats.pomodoros[stats.currentYear]).reduce((acc, val) => acc + val) }} Pomodoros in {{ stats.currentYear }} </h2>
+        <h2 v-else>0 Pomodoros in {{ stats.currentYear }}</h2>
       </div>
-      <Heatmap v-if="stats.total > 0" :pomodoros="stats.daily" :start="historyStart" key="chart"></Heatmap>
+      <Heatmap
+        v-if="stats && stats.pomodoros"
+        :pomodoros="stats.pomodoros[stats.currentYear]"
+        :start="twentytwentytwo"
+        :end="twentytwentythree"
+        key="chart"
+      ></Heatmap>
       <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
     </section>
     <section class="chart">
-      <div class="title">{{ M.your_history }}</div>
-      <div class="actions">
-        <div class="action">
-          <button @click="exportHistoryCSV">{{ M.save_as_csv }}</button>
-          <p>{{ M.save_as_csv_description }}</p>
-        </div>
-        <div class="action">
-          <button @click="exportHistory">{{ M.export }}</button>
-          <p>{{ M.export_description }}</p>
-        </div>
-        <div class="action">
-          <button @click="importHistory">{{ M.import }}</button>
-          <p>{{ M.import_description }}</p>
-        </div>
-        <div class="action">
-          <button @click="clearHistory">{{ M.clear_history }}</button>
-          <p>{{ M.clear_history_description }}</p>
-        </div>
+      <div class="title">
+        <h2
+          v-if="stats && stats.pomodoros && stats.pomodoros['2020'] && Object.keys(stats.pomodoros['2020']).length"
+        >{{ Object.values(stats.pomodoros['2020']).reduce((acc, val) => acc + val) }} Pomodoros in 2020</h2>
+        <h2 v-else>0 Pomodoros in 2020</h2>
       </div>
+      <Heatmap
+        v-if="stats && stats.pomodoros"
+        :pomodoros="stats.pomodoros['2020']"
+        :start="twentytwenty"
+        :end="twentytwentyone"
+        key="chart"
+      ></Heatmap>
+      <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
+    </section>
+    <section class="chart">
+      <div class="title">
+        <h2
+          v-if="stats && stats.pomodoros && stats.pomodoros['2019'] && Object.keys(stats.pomodoros['2019']).length"
+        >{{ Object.values(stats.pomodoros['2019']).reduce((acc, val) => acc + val) }} Pomodoros in 2019</h2>
+        <h2 v-else>0 Pomodoros in 2019</h2>
+      </div>
+      <Heatmap
+        v-if="stats && stats.pomodoros"
+        :pomodoros="stats.pomodoros['2019']"
+        :start="twentynineteen"
+        :end="twentytwenty"
+        key="chart"
+      ></Heatmap>
+      <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
+    </section>
+    <section class="chart">
+      <div class="title">
+        <!-- <h2>{{ stats.pomodoros | pomodoroCount }} in 2018</h2> -->
+        <h2
+          v-if="stats && stats.pomodoros && stats.pomodoros['2018'] && Object.keys(stats.pomodoros['2018']).length"
+        >{{ Object.values(stats.pomodoros['2018']).reduce((acc, val) => acc + val) }} Pomodoros in 2018</h2>
+        <h2 v-else>0 Pomodoros in 2018</h2>
+      </div>
+      <Heatmap
+        v-if="stats && stats.pomodoros"
+        :pomodoros="stats.pomodoros['2018']"
+        :start="twentyeighteen"
+        :end="twentynineteen"
+        key="chart"
+      ></Heatmap>
+      <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
     </section>
   </div>
 </template>
@@ -193,13 +236,13 @@
 </style>
 
 <script>
-import { HistoryClient, PomodoroClient } from '../background/Services';
-import { integer, float, strftime, pomodoroCount } from '../Filters';
-import * as File from './File';
-import Heatmap from './Heatmap';
-import DayDistribution from './DayDistribution';
-import WeekDistribution from './WeekDistribution';
-import M from '../Messages';
+import { HistoryClient, PomodoroClient } from "../background/Services";
+import { integer, float, strftime, pomodoroCount } from "../Filters";
+import * as File from "./File";
+import Heatmap from "./Heatmap";
+import DayDistribution from "./DayDistribution";
+import WeekDistribution from "./WeekDistribution";
+import M from "../Messages";
 
 export default {
   data() {
@@ -207,13 +250,19 @@ export default {
       historyClient: new HistoryClient(),
       pomodoroClient: new PomodoroClient(),
       stats: null,
-      historyStart: null,
-      dayDistributionBucketSize: 30
+      // historyStart: null,
+      twentyeighteen:    new Date(2018, 0, 1, 0, 0),
+      twentynineteen:    new Date(2019, 0, 1, 0, 0),
+      twentytwenty:      new Date(2020, 0, 1, 0, 0),
+      twentytwentyone:   new Date(2021, 0, 1, 0, 0),
+      twentytwentytwo:   new Date(2022, 0, 1, 0, 0),
+      twentytwentythree: new Date(2023, 0, 1, 0, 0),
+      // dayDistributionBucketSize: 30
     };
   },
   async mounted() {
     this.updateStats();
-    this.pomodoroClient.on('expire', () => {
+    this.pomodoroClient.on("expire", () => {
       this.updateStats();
     });
   },
@@ -222,17 +271,17 @@ export default {
     this.pomodoroClient.dispose();
   },
   methods: {
-    async exportHistoryCSV() {
-      let csv = await this.historyClient.getCSV();
-      File.save('history.csv', csv);
-    },
+    // async exportHistoryCSV() {
+    //   let csv = await this.historyClient.getCSV();
+    //   File.save('history.csv', csv);
+    // },
     async exportHistory() {
       let json = JSON.stringify(await this.historyClient.getAll());
-      File.save('history.json', json);
+      File.save("history.json", json);
     },
     async importHistory() {
       try {
-        let content = await File.readText('.json');
+        let content = await File.readText(".json");
         if (!content) {
           return;
         }
@@ -242,7 +291,8 @@ export default {
           return;
         }
 
-        let count = await this.historyClient.merge(history);
+        // let count = await this.historyClient.merge(history);
+        let count = await this.historyClient.merge2(history);
         alert(M.pomodoros_imported(pomodoroCount(count)));
       } catch (e) {
         alert(M.import_failed(`${e}`));
@@ -263,12 +313,13 @@ export default {
       let now = new Date();
       let start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      // Start at the first Sunday at least 39 weeks (~9 months) ago.
-      start.setDate(start.getDate() - 273);
+      // Start at the first Sunday at least 39 weeks (~9 months) ago. 273
+      start.setDate(start.getDate() - 365);
       start.setDate(start.getDate() - start.getDay());
-      this.stats = await this.historyClient.getStats(+start);
-      this.historyStart = start;
-    }
+      // this.stats = await this.historyClient.getStats(+start);
+      this.stats = await this.historyClient.getStats2();
+      // this.historyStart = start;
+    },
   },
   filters: {
     integer,
@@ -277,12 +328,12 @@ export default {
     strftime,
     in_month: M.in_month,
     average_stat: M.average_stat,
-    last_9_months: M.last_9_months
+    // last_12_months: M.last_12_months
   },
   components: {
     Heatmap,
     DayDistribution,
-    WeekDistribution
-  }
+    WeekDistribution,
+  },
 };
 </script>

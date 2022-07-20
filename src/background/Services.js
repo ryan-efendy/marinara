@@ -73,6 +73,10 @@ class HistoryService extends Service
     return await this.history.stats(since);
   }
 
+  async getStats2() {
+    return await this.history.stats2();
+  }
+
   async getCSV() {
     return await this.history.toCSV();
   }
@@ -83,6 +87,10 @@ class HistoryService extends Service
 
   async merge(history) {
     return await this.history.merge(history);
+  }
+
+  async merge2(history) {
+    return await this.history.merge2(history);
   }
 
   async clearHistory() {
@@ -170,7 +178,7 @@ class OptionsService extends Service
   async showHistoryPage() {
     return await this.showPage('history');
   }
-
+  
   async showFeedbackPage() {
     return await this.showPage('feedback');
   }

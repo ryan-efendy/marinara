@@ -1,6 +1,35 @@
 <template>
   <div class="tab-page feedback">
     <div class="title">
+      <h1>Cheat Sheet</h1>
+      <h2>1. Work deeply</h2>
+      <p>Schedule breaks from focus - only allow novelty stimuli after 🍅🍅 or 🍅🍅🍅🍅 sessions</p>
+      <p>Single task; no multitasking ✋⛔ focusing on 1️⃣ task at a time maximizes productive output</p>
+      <p>Do 1️⃣ thing for as long 🚀 as you can then turn it off completely and go on to the next thing</p>
+      <p>Eliminate distraction 🔫</p>
+      <p>Intense focus 🧠 for extended periods of time 🔥</p>
+      <p>Beware of attention residue 💀</p>
+      <p>Set a timer for 10 minutes max during break i.e. diffuse mode ⌚️</p>
+
+      <h2>2. Embrace boredom 🙄</h2>
+      <p>Try not to fill every single empty space in your day. Allow your mind to wander instead of constantly stimulating it</p>
+
+      <h2>3. Quit social media</h2>
+      <p>Turn off/minimize notifications. DND 😴🌙</p>
+      <p>Stop checking email/messages constantly (attendion residue‼️) (use batching!)</p>
+
+      <h2>4. Drain the shallow</h2>
+      <p>Become hard to reach: you don’t have to respond to every email sent to you but should lower other people’s expectations instead...😤</p>
+    </div>
+
+    <div class="title">
+      <h1>Smart Routines/Rituals</h1>
+      <h2>1. Set focus timer to 2 hours (block distractions i.e. text, email)</h2>
+      <h2>2. Meditation/pep talk - maybe pray? Breathe and let go of distracting thoughts</h2>
+      <h2>3. Put on headphone, play focus playlist</h2>
+      <h2>4. Write down any distraction in NOT TO DO LIST</h2>
+    </div>
+    <!-- <div class="title">
       <h1>{{ M.app_name_short }}</h1>
       <h2>{{ M.pomodoro_assistant }}</h2>
       <p>
@@ -32,7 +61,7 @@
         <li>{{ version }}</li>
       </ul>
     </div>
-    <p class="disclaimer">{{ M.disclaimer }}</p>
+    <p class="disclaimer">{{ M.disclaimer }}</p> -->
   </div>
 </template>
 

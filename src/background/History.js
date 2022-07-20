@@ -3,13 +3,17 @@ import StorageManager from './StorageManager';
 import RLE from './RLE';
 import Mutex from '../Mutex';
 import M from '../Messages';
-import moment from 'moment';
+import * as firebase from 'firebase/app';
+import 'firebase/database';
 
 class History
 {
   constructor() {
     this.storage = new StorageManager(new HistorySchema(), Chrome.storage.local);
     this.mutex = new Mutex();
+    this.ref = firebase.database().ref('pomodoros');
+    this.pomodoros = {};
+    this.currentYear = new Date().getFullYear().toString();
   }
 
   async all() {
@@ -20,6 +24,7 @@ class History
     await this.storage.set(this.storage.schema.default);
   }
 
+  // deprecated
   async merge(history) {
     return await this.mutex.exclusive(async () => {
       let existing = decompress(await this.storage.get());
@@ -30,48 +35,50 @@ class History
     });
   }
 
-  async toCSV() {
-    let {
-      pomodoros,
-      durations,
-      timezones
-    } = decompress(await this.storage.get());
+  // deprecated
+  // async toCSV() {
+  //   let {
+  //     pomodoros,
+  //     durations,
+  //     timezones
+  //   } = decompress(await this.storage.get());
 
-    const escape = value => {
-      if (value.indexOf(',') < 0) {
-        return value;
-      }
+  //   const escape = value => {
+  //     if (value.indexOf(',') < 0) {
+  //       return value;
+  //     }
 
-      return '"' + value.replace(/"/g, '""') + '"';
-    };
+  //     return '"' + value.replace(/"/g, '""') + '"';
+  //   };
 
-    const row = values => values.map(v => escape(v.toString())).join(',') + '\n';
+  //   const row = values => values.map(v => escape(v.toString())).join(',') + '\n';
 
-    let csv = row([
-      M.end_iso_8601,
-      M.end_date,
-      M.end_time,
-      M.end_timestamp,
-      M.end_timezone,
-      M.duration_seconds
-    ]);
+  //   let csv = row([
+  //     M.end_iso_8601,
+  //     M.end_date,
+  //     M.end_time,
+  //     M.end_timestamp,
+  //     M.end_timezone,
+  //     M.duration_seconds
+  //   ]);
 
-    for (let i = 0; i < pomodoros.length; i++) {
-      let [timestamp, timezone] = [pomodoros[i] * 60, -timezones[i]];
-      let time = moment.unix(timestamp).utcOffset(timezone, true);
-      csv += row([
-        time.toISOString(true),
-        time.format('YYYY-MM-DD'),
-        time.format('HH:mm:ss'),
-        timestamp,
-        timezone,
-        durations[i]
-      ]);
-    }
+  //   for (let i = 0; i < pomodoros.length; i++) {
+  //     let [timestamp, timezone] = [pomodoros[i] * 60, -timezones[i]];
+  //     let time = moment.unix(timestamp).utcOffset(timezone, true);
+  //     csv += row([
+  //       time.toISOString(true),
+  //       time.format('YYYY-MM-DD'),
+  //       time.format('HH:mm:ss'),
+  //       timestamp,
+  //       timezone,
+  //       durations[i]
+  //     ]);
+  //   }
 
-    return csv;
-  }
+  //   return csv;
+  // }
 
+  // deprecated
   async addPomodoro(duration, when = null) {
     await this.mutex.exclusive(async () => {
       let local = await this.storage.get();
@@ -112,6 +119,7 @@ class History
     });
   }
 
+  // deprecated
   async stats(since) {
     return this.mutex.exclusive(async () => {
       let { pomodoros } = await this.storage.get('pomodoros');
@@ -137,25 +145,28 @@ class History
     });
   }
 
-  async countToday(pomodoros = null) {
-    return this.mutex.exclusive(async () => {
-      if (!pomodoros) {
-        pomodoros = (await this.storage.get('pomodoros')).pomodoros;
-        if (pomodoros.length === 0) {
-          return 0;
-        }
-      }
+  // deprecated
+  // async countToday(pomodoros = null) {
+  //   return this.mutex.exclusive(async () => {
+  //     if (!pomodoros) {
+  //       pomodoros = (await this.storage.get('pomodoros')).pomodoros;
+  //       if (pomodoros.length === 0) {
+  //         return 0;
+  //       }
+  //     }
 
-      return this.countSince(pomodoros, History.today);
-    });
-  }
+  //     return this.countSince(pomodoros, History.today);
+  //   });
+  // }
 
+  // deprecated
   countSince(pomodoros, date) {
     let timestamp = History.timestamp(date);
     let index = search(pomodoros, timestamp);
     return pomodoros.length - index;
   }
 
+  // deprecated
   dailyGroups(pomodoros, since) {
     let start = new Date(since);
 
@@ -175,14 +186,17 @@ class History
     return daily;
   }
 
+  // deprecated
   static timestamp(date) {
     return Math.floor(+date / 1000 / 60);
   }
 
+  // deprecated
   static date(timestamp) {
     return new Date(timestamp * 60 * 1000);
   }
 
+  // deprecated
   static get today() {
     let today = new Date();
     today.setHours(0);
@@ -192,6 +206,7 @@ class History
     return today;
   }
 
+  // deprecated
   static get thisWeek() {
     let week = new Date();
     week.setDate(week.getDate() - week.getDay());
@@ -202,6 +217,7 @@ class History
     return week;
   }
 
+  // deprecated
   static get thisMonth() {
     let month = new Date();
     month.setDate(1);
@@ -210,6 +226,187 @@ class History
     month.setSeconds(0);
     month.setMilliseconds(0);
     return month;
+  }
+
+  /** 
+  * get pomodoros obj from firebase
+  * @return {ReturnValueDataTypeHere} pomodoros obj {2018: {date: 1, date: 2...}, 2019: {...}, 2020: {...}}
+  */
+  async getPomodoros() {
+    return new Promise((resolve, reject) => {
+      this.ref.on("value", (snapshot) => {
+        resolve(snapshot.val());
+      }, (error) => {
+        console.log("Error: " + error.code);
+        reject(error);
+      });
+    });
+  }
+
+  async merge2(history) {
+    return await this.mutex.exclusive(async () => {
+      await this.storage.set(history);
+      let total = 0;
+      for (let year in history.pomodoros) {
+        if (history.pomodoros.hasOwnProperty(year)) {
+          if (!Object.keys(history.pomodoros[year]).length) continue;
+          total += Object.values(history.pomodoros[year]).reduce((acc, val) => acc + val)
+        }
+      }
+      return total;
+    });
+  }
+  /** 
+  * invoke when a pomodoro completes
+  * @return {ReturnValueDataTypeHere} Brief description of the returning value here.
+  */
+  async addPomodoro2() {
+    await this.mutex.exclusive(async () => {
+      if (this.pomodoros === undefined || this.pomodoros === null || Object.entries(this.pomodoros).length === 0) {
+        this.pomodoros = await this.getPomodoros();
+      }
+      
+      let today = new Date().setHours(0, 0, 0, 0);
+
+      // need to update every new year or make it dynamic
+      let twentyTwentyTwoRef = firebase.database().ref("pomodoros/2022");
+
+      if (today in this.pomodoros[this.currentYear]) {
+        this.pomodoros[this.currentYear][today] += 1;
+      } else {
+        this.pomodoros[this.currentYear][today] = 1;
+      }
+
+      twentyTwentyTwoRef.update(this.pomodoros[this.currentYear]);
+      return this.countSinceToday(this.pomodoros[this.currentYear]);
+    });
+  }
+
+  async stats2() {
+    return this.mutex.exclusive(async () => {
+      this.pomodoros = await this.getPomodoros();
+
+      let total = 0;
+      for (let year in this.pomodoros) {
+        if (this.pomodoros.hasOwnProperty(year)) {
+          if (!Object.keys(this.pomodoros[year]).length) continue;
+          total += Object.values(this.pomodoros[year]).reduce((acc, val) => acc + val)
+        }
+      }
+
+      let delta = total === 0 ? 0 : (new Date() - Object.keys(this.pomodoros[Object.keys(this.pomodoros)[0]])[0]); // gets the first key's key
+      let dayCount = Math.max(delta / 1000 / 60 / 60 / 24, 1);
+      let weekCount = Math.max(dayCount / 7, 1);
+      let monthCount = Math.max(dayCount / (365.25 / 12), 1);
+
+      return {
+        pomodoros: this.pomodoros,
+        day: this.countSinceToday(this.pomodoros[this.currentYear]),
+        dayAverage: total / dayCount,
+        week: this.countSinceThisWeek(this.pomodoros[this.currentYear]),
+        weekAverage: total / weekCount,
+        month: this.countSinceThisMonth(this.pomodoros[this.currentYear]),
+        monthAverage: total / monthCount,
+        // period: this.countSince2(pomodoros[this.currentYear], new Date(since)),
+        total: total,
+        currentYear: this.currentYear
+      };
+    });
+  }
+
+  /**
+ * Returns the sum of all numbers passed to the function.
+ * @param {...number} num - A positive or negative number.
+ */
+  async countToday() {
+    return this.mutex.exclusive(async () => {
+      if (!this.pomodoros) {
+        // pomodoros = (await this.storage.get('pomodoros')).pomodoros;
+        this.pomodoros = await this.getPomodoros();
+        
+
+        if (Object.keys(this.pomodoros[this.currentYear]).length === 0) {
+          return 0;
+        }
+      }
+
+      // return this.countSince(pomodoros, History.today);
+      return this.countSinceToday(this.pomodoros[this.currentYear]);
+    });
+  }
+
+  /**
+   * Returns how many pomodoros completed from date (i.e. today)
+   * @param {Object} pomodoros - "pomodoros": { "2018": { "1545379200000": 7, "2019": { "1545379200000": 7}}
+   * @param {Date} date - beginning of today's date 
+   */
+  countSinceToday(pomodoros) {
+    if (!pomodoros) return 0;
+
+    let today = new Date();
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
+
+    return +today in pomodoros ? pomodoros[+today] : 0;
+  }
+
+  countSinceThisWeek(pomodoros) {
+    if (!pomodoros) return 0;
+
+    let daysInWeek = [];
+    let d = new Date();
+    d.setDate(d.getDate() - d.getDay());
+    d.setHours(0);
+    d.setMinutes(0);
+    d.setSeconds(0);
+    d.setMilliseconds(0);
+
+    for (let i = 0; i < 7; i++) {
+      daysInWeek.push(+d);
+      d.setDate(d.getDate() + 1);
+    }
+
+    let total = 0;
+    daysInWeek.forEach(day => {
+      total += !isNaN(pomodoros[day]) ? parseInt(pomodoros[day]) : 0;
+    });
+
+    return total;
+  }
+
+  countSinceThisMonth(pomodoros) {
+    if (!pomodoros) return 0;
+
+    let daysInMonth = [];
+    let d = new Date();
+    d.setDate(1);
+    d.setHours(0);
+    d.setMinutes(0);
+    d.setSeconds(0);
+    d.setMilliseconds(0);
+    let nextMonth = d.getMonth() + 1;
+
+    while (d.getMonth() < nextMonth) {
+      daysInMonth.push(+d);
+      d.setDate(d.getDate() + 1);
+    }
+
+    let total = 0;
+    daysInMonth.forEach(day => {
+      total += !isNaN(pomodoros[day]) ? parseInt(pomodoros[day]) : 0;
+    });
+
+    return total;
+  }
+
+  static timestamp(date) {
+    return Math.floor(+date / 1000 / 60);
+  }
+
+  static date(timestamp) {
+    return new Date(timestamp * 60 * 1000);
   }
 }
 
@@ -221,9 +418,9 @@ class HistorySchema
 
   get default() {
     return {
-      pomodoros: [],
-      durations: [],
-      timezones: [],
+      pomodoros: {},
+      // durations: [],
+      // timezones: [],
       version: this.version
     };
   }
