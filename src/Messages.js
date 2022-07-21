@@ -697,9 +697,6 @@ class Messages
   get your_history() {
     return chrome.i18n.getMessage('your_history', []);
   }
-  get cheat_sheet() {
-    return chrome.i18n.getMessage('cheat_sheet', []);
-  }
 }
 
 export default new Messages();
