@@ -139,7 +139,7 @@ class NotificationObserver
     this.mutex = new Mutex();
   }
 
-  onStart() {
+  async onStart() {
     this.mutex.exclusive(async () => {
       if (this.notification) {
         this.notification.close();
@@ -150,6 +150,9 @@ class NotificationObserver
         this.expiration.close();
         this.expiration = null;
       }
+
+      this.notification = new Notification(`FOCUS!!! 🚀🚀🚀`, new Date().toLocaleString(), null);
+      await this.notification.show();
     });
   }
 
@@ -192,6 +195,7 @@ class NotificationObserver
 
     await this.mutex.exclusive(async () => {
       if (settings.notifications.desktop) {
+        messages.push(new Date().toLocaleString());
         this.notification = new Notification(title, messages.join('\n'), () => this.timer.start());
         this.notification.addButton(buttonText, () => this.timer.start());
         await this.notification.show();
