@@ -80,6 +80,7 @@ class History
 
   // deprecated
   async addPomodoro(duration, when = null) {
+    // debugger;
     await this.mutex.exclusive(async () => {
       let local = await this.storage.get();
 
@@ -120,30 +121,30 @@ class History
   }
 
   // deprecated
-  async stats(since) {
-    return this.mutex.exclusive(async () => {
-      let { pomodoros } = await this.storage.get('pomodoros');
+  // async stats(since) {
+  //   return this.mutex.exclusive(async () => {
+  //     let { pomodoros } = await this.storage.get('pomodoros');
 
-      let total = pomodoros.length;
-      let delta = total === 0 ? 0 : (new Date() - History.date(pomodoros[0]));
-      let dayCount = Math.max(delta / 1000 / 60 / 60 / 24, 1);
-      let weekCount = Math.max(dayCount / 7, 1);
-      let monthCount = Math.max(dayCount / (365.25 / 12), 1);
+  //     let total = pomodoros.length;
+  //     let delta = total === 0 ? 0 : (new Date() - History.date(pomodoros[0]));
+  //     let dayCount = Math.max(delta / 1000 / 60 / 60 / 24, 1);
+  //     let weekCount = Math.max(dayCount / 7, 1);
+  //     let monthCount = Math.max(dayCount / (365.25 / 12), 1);
 
-      return {
-        day: this.countSince(pomodoros, History.today),
-        dayAverage: total / dayCount,
-        week: this.countSince(pomodoros, History.thisWeek),
-        weekAverage: total / weekCount,
-        month: this.countSince(pomodoros, History.thisMonth),
-        monthAverage: total / monthCount,
-        period: this.countSince(pomodoros, new Date(since)),
-        total: total,
-        daily: this.dailyGroups(pomodoros, since),
-        pomodoros: pomodoros.map(p => +History.date(p))
-      };
-    });
-  }
+  //     return {
+  //       day: this.countSince(pomodoros, History.today),
+  //       dayAverage: total / dayCount,
+  //       week: this.countSince(pomodoros, History.thisWeek),
+  //       weekAverage: total / weekCount,
+  //       month: this.countSince(pomodoros, History.thisMonth),
+  //       monthAverage: total / monthCount,
+  //       period: this.countSince(pomodoros, new Date(since)),
+  //       total: total,
+  //       daily: this.dailyGroups(pomodoros, since),
+  //       pomodoros: pomodoros.map(p => +History.date(p))
+  //     };
+  //   });
+  // }
 
   // deprecated
   // async countToday(pomodoros = null) {
@@ -233,6 +234,7 @@ class History
   * @return {ReturnValueDataTypeHere} pomodoros obj {2018: {date: 1, date: 2...}, 2019: {...}, 2020: {...}}
   */
   async getPomodoros() {
+    // debugger;
     return new Promise((resolve, reject) => {
       this.ref.on("value", (snapshot) => {
         resolve(snapshot.val());
@@ -261,6 +263,7 @@ class History
   * @return {ReturnValueDataTypeHere} Brief description of the returning value here.
   */
   async addPomodoro2() {
+    // debugger;
     await this.mutex.exclusive(async () => {
       if (this.pomodoros === undefined || this.pomodoros === null || Object.entries(this.pomodoros).length === 0) {
         this.pomodoros = await this.getPomodoros();
@@ -283,6 +286,7 @@ class History
   }
 
   async stats2() {
+    // debugger;
     return this.mutex.exclusive(async () => {
       this.pomodoros = await this.getPomodoros();
 
@@ -386,7 +390,13 @@ class History
     d.setMinutes(0);
     d.setSeconds(0);
     d.setMilliseconds(0);
-    let nextMonth = d.getMonth() + 1;
+    // 🐛 bug here, if month is december (11), make sure to set it to january (0)
+    let nextMonth = -1
+    if (d.getMonth() === 11) {
+      nextMonth = 0
+    } else {
+      nextMonth = d.getMonth() + 1;
+    }
 
     while (d.getMonth() < nextMonth) {
       daysInMonth.push(+d);

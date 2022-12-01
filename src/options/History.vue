@@ -317,6 +317,7 @@ export default {
       start.setDate(start.getDate() - 365);
       start.setDate(start.getDate() - start.getDay());
       // this.stats = await this.historyClient.getStats(+start);
+      // debugger;
       this.stats = await this.historyClient.getStats2();
       // this.historyStart = start;
     },

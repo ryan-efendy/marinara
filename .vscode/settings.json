@@ -1,0 +1,20 @@
+{
+    "files.exclude": {
+        ".browserslistrc": true,
+        // ".git*": true,
+        ".github": true,
+        ".travis.yml": true,
+        "assets": true,
+        "babel.config.js": true,
+        "CONTRIBUTORS.md": true,
+        "deploy": true,
+        "LICENSE": true,
+        "Makefile": true,
+        "node_modules": true,
+        "package": true,
+        "postcss.config.js": true,
+        "RELEASE.md": true,
+        "scripts": true,
+        "tests": true
+    }
+}

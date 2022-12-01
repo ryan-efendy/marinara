@@ -69,9 +69,10 @@ class HistoryService extends Service
     this.history = history;
   }
 
-  async getStats(since) {
-    return await this.history.stats(since);
-  }
+  // deprecated
+  // async getStats(since) {
+  //   return await this.history.stats(since);
+  // }
 
   async getStats2() {
     return await this.history.stats2();
