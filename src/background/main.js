@@ -8,7 +8,19 @@ import { HistoryService, SoundsService, SettingsService, PomodoroService, Option
 import { BadgeObserver, TimerSoundObserver, ExpirationSoundObserver, NotificationObserver, HistoryObserver, CountdownObserver, MenuObserver } from './Observers';
 import { ServiceBroker } from '../Service';
 import * as Alarms from './Alarms';
-import firebase from 'firebase/app';
+import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyACuCp3OtnKvo1Pb0LVHF-OJrpw_EKOXOo",
+  authDomain: "marinara-da936.firebaseapp.com",
+  databaseURL: "https://marinara-da936.firebaseio.com",
+  projectId: "marinara-da936",
+  storageBucket: "marinara-da936.appspot.com",
+  messagingSenderId: "1045080728495",
+  appId: "1:1045080728495:web:877f08b8f4d78a8907055a"
+};
 
 async function run() {
   chrome.runtime.onUpdateAvailable.addListener(() => {
@@ -18,20 +30,14 @@ async function run() {
     // See https://developer.chrome.com/apps/runtime#event-onUpdateAvailable.
   });
 
-  firebase.initializeApp({
-    apiKey: "AIzaSyACuCp3OtnKvo1Pb0LVHF-OJrpw_EKOXOo",
-    authDomain: "marinara-da936.firebaseapp.com",
-    databaseURL: "https://marinara-da936.firebaseio.com",
-    projectId: "marinara-da936",
-    storageBucket: "marinara-da936.appspot.com",
-    messagingSenderId: "1045080728495",
-    appId: "1:1045080728495:web:877f08b8f4d78a8907055a"
-  });
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase();
 
   let settingsManager = new StorageManager(new SettingsSchema(), Chrome.storage.local);
   let settings = await PersistentSettings.create(settingsManager);
   let timer = new PomodoroTimer(settings);
-  let history = new History();
+  let history = new History(db);
 
   let menu = createPomodoroMenu(timer);
   timer.observe(new HistoryObserver(history));

@@ -3,17 +3,18 @@ import StorageManager from './StorageManager';
 import RLE from './RLE';
 import Mutex from '../Mutex';
 import M from '../Messages';
-import * as firebase from 'firebase/app';
+// import * as firebase from 'firebase/app';
+import { ref, set, onValue } from "firebase/database";
 import 'firebase/database';
 
 class History
 {
-  constructor() {
+  constructor(db) {
     this.storage = new StorageManager(new HistorySchema(), Chrome.storage.local);
     this.mutex = new Mutex();
-    this.ref = firebase.database().ref('pomodoros');
+    this.db = db;
+    this.ref = ref(db, `pomodoros/work/${new Date().getFullYear().toString()}`);
     this.pomodoros = {};
-    this.currentYear = new Date().getFullYear().toString();
   }
 
   async all() {
@@ -236,10 +237,10 @@ class History
   async getPomodoros() {
     // debugger;
     return new Promise((resolve, reject) => {
-      this.ref.on("value", (snapshot) => {
+      onValue(this.ref, (snapshot) => {
         resolve(snapshot.val());
       }, (error) => {
-        console.log("Error: " + error.code);
+        console.log("Error: " + error);
         reject(error);
       });
     });
@@ -271,17 +272,14 @@ class History
       
       let today = new Date().setHours(0, 0, 0, 0);
 
-      // need to update every new year or make it dynamic
-      let twentyTwentyTwoRef = firebase.database().ref("pomodoros/2022");
-
-      if (today in this.pomodoros[this.currentYear]) {
-        this.pomodoros[this.currentYear][today] += 1;
+      if (today in this.pomodoros) {
+        this.pomodoros[today] += 1;
       } else {
-        this.pomodoros[this.currentYear][today] = 1;
+        this.pomodoros[today] = 1;
       }
 
-      twentyTwentyTwoRef.update(this.pomodoros[this.currentYear]);
-      return this.countSinceToday(this.pomodoros[this.currentYear]);
+      set(this.ref, this.pomodoros);
+      return this.countSinceToday(this.pomodoros);
     });
   }
 
@@ -289,31 +287,31 @@ class History
     // debugger;
     return this.mutex.exclusive(async () => {
       this.pomodoros = await this.getPomodoros();
+      // debugger;
 
-      let total = 0;
-      for (let year in this.pomodoros) {
-        if (this.pomodoros.hasOwnProperty(year)) {
-          if (!Object.keys(this.pomodoros[year]).length) continue;
-          total += Object.values(this.pomodoros[year]).reduce((acc, val) => acc + val)
-        }
-      }
-
-      let delta = total === 0 ? 0 : (new Date() - Object.keys(this.pomodoros[Object.keys(this.pomodoros)[0]])[0]); // gets the first key's key
+      // let total = 0;
+      // for (let year in this.pomodoros) {
+      //   if (this.pomodoros.hasOwnProperty(year)) {
+      //     if (!Object.keys(this.pomodoros[year]).length) continue;
+      //     total += Object.values(this.pomodoros[year]).reduce((acc, val) => acc + val)
+      //   }
+      // }
+      let total = Object.values(this.pomodoros).reduce((acc, val) => acc + val)
+      let delta = total === 0 ? 0 : (new Date() - Object.keys(this.pomodoros)[0]); // gets the first key's key
       let dayCount = Math.max(delta / 1000 / 60 / 60 / 24, 1);
       let weekCount = Math.max(dayCount / 7, 1);
       let monthCount = Math.max(dayCount / (365.25 / 12), 1);
 
       return {
         pomodoros: this.pomodoros,
-        day: this.countSinceToday(this.pomodoros[this.currentYear]),
+        day: this.countSinceToday(this.pomodoros),
         dayAverage: total / dayCount,
-        week: this.countSinceThisWeek(this.pomodoros[this.currentYear]),
+        week: this.countSinceThisWeek(this.pomodoros),
         weekAverage: total / weekCount,
-        month: this.countSinceThisMonth(this.pomodoros[this.currentYear]),
+        month: this.countSinceThisMonth(this.pomodoros),
         monthAverage: total / monthCount,
-        // period: this.countSince2(pomodoros[this.currentYear], new Date(since)),
-        total: total,
-        currentYear: this.currentYear
+        // period: this.countSince2(pomodoros, new Date(since)),
+        total
       };
     });
   }
@@ -329,13 +327,13 @@ class History
         this.pomodoros = await this.getPomodoros();
         
 
-        if (Object.keys(this.pomodoros[this.currentYear]).length === 0) {
+        if (Object.keys(this.pomodoros).length === 0) {
           return 0;
         }
       }
 
       // return this.countSince(pomodoros, History.today);
-      return this.countSinceToday(this.pomodoros[this.currentYear]);
+      return this.countSinceToday(this.pomodoros);
     });
   }
 
@@ -383,28 +381,24 @@ class History
   countSinceThisMonth(pomodoros) {
     if (!pomodoros) return 0;
 
-    let daysInMonth = [];
+    let dateInMonth = [];
     let d = new Date();
     d.setDate(1);
     d.setHours(0);
     d.setMinutes(0);
     d.setSeconds(0);
     d.setMilliseconds(0);
-    // 🐛 bug here, if month is december (11), make sure to set it to january (0)
-    let nextMonth = -1
-    if (d.getMonth() === 11) {
-      nextMonth = 0
-    } else {
-      nextMonth = d.getMonth() + 1;
-    }
+    
+    let lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    let daysInMonth = lastDay.getDate()
 
-    while (d.getMonth() < nextMonth) {
-      daysInMonth.push(+d);
+    for (let i = 0; i < daysInMonth; i++) {
+      dateInMonth.push(+d);
       d.setDate(d.getDate() + 1);
     }
 
     let total = 0;
-    daysInMonth.forEach(day => {
+    dateInMonth.forEach(day => {
       total += !isNaN(pomodoros[day]) ? parseInt(pomodoros[day]) : 0;
     });
 

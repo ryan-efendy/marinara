@@ -55,20 +55,20 @@
     <section class="chart">
       <div class="title">
         <h2
-          v-if="stats && stats.pomodoros && stats.pomodoros[stats.currentYear] && Object.keys(stats.pomodoros[stats.currentYear]).length"
-        >{{ Object.values(stats.pomodoros[stats.currentYear]).reduce((acc, val) => acc + val) }} Pomodoros in {{ stats.currentYear }} </h2>
-        <h2 v-else>0 Pomodoros in {{ stats.currentYear }}</h2>
+          v-if="stats && stats.pomodoros && Object.keys(stats.pomodoros).length"
+        >{{ Object.values(stats.pomodoros).reduce((acc, val) => acc + val) }} Pomodoros in {{ this.currentYear }} </h2>
+        <h2 v-else>0 Pomodoros in {{ this.currentYear }}</h2>
       </div>
       <Heatmap
         v-if="stats && stats.pomodoros"
-        :pomodoros="stats.pomodoros[stats.currentYear]"
-        :start="twentytwentytwo"
-        :end="twentytwentythree"
+        :pomodoros="stats.pomodoros"
+        :start="historyStart"
+        :end="historyEnd"
         key="chart"
       ></Heatmap>
       <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
     </section>
-    <section class="chart">
+    <!-- <section class="chart">
       <div class="title">
         <h2
           v-if="stats && stats.pomodoros && stats.pomodoros['2020'] && Object.keys(stats.pomodoros['2020']).length"
@@ -83,8 +83,8 @@
         key="chart"
       ></Heatmap>
       <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
-    </section>
-    <section class="chart">
+    </section> -->
+    <!-- <section class="chart">
       <div class="title">
         <h2
           v-if="stats && stats.pomodoros && stats.pomodoros['2019'] && Object.keys(stats.pomodoros['2019']).length"
@@ -99,10 +99,9 @@
         key="chart"
       ></Heatmap>
       <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
-    </section>
-    <section class="chart">
+    </section> -->
+    <!-- <section class="chart">
       <div class="title">
-        <!-- <h2>{{ stats.pomodoros | pomodoroCount }} in 2018</h2> -->
         <h2
           v-if="stats && stats.pomodoros && stats.pomodoros['2018'] && Object.keys(stats.pomodoros['2018']).length"
         >{{ Object.values(stats.pomodoros['2018']).reduce((acc, val) => acc + val) }} Pomodoros in 2018</h2>
@@ -116,7 +115,7 @@
         key="chart"
       ></Heatmap>
       <div v-else class="empty" key="empty">{{ M.history_empty_placeholder }}</div>
-    </section>
+    </section> -->
   </div>
 </template>
 
@@ -251,12 +250,12 @@ export default {
       pomodoroClient: new PomodoroClient(),
       stats: null,
       // historyStart: null,
-      twentyeighteen:    new Date(2018, 0, 1, 0, 0),
-      twentynineteen:    new Date(2019, 0, 1, 0, 0),
-      twentytwenty:      new Date(2020, 0, 1, 0, 0),
-      twentytwentyone:   new Date(2021, 0, 1, 0, 0),
-      twentytwentytwo:   new Date(2022, 0, 1, 0, 0),
-      twentytwentythree: new Date(2023, 0, 1, 0, 0),
+      // twentyeighteen:    new Date(2018, 0, 1, 0, 0),
+      // twentynineteen:    new Date(2019, 0, 1, 0, 0),
+      // twentytwenty:      new Date(2020, 0, 1, 0, 0),
+      // twentytwentyone:   new Date(2021, 0, 1, 0, 0),
+      // twentytwentytwo:   new Date(2022, 0, 1, 0, 0),
+      // twentytwentythree: new Date(2023, 0, 1, 0, 0),
       // dayDistributionBucketSize: 30
     };
   },
@@ -310,16 +309,14 @@ export default {
       await this.updateStats();
     },
     async updateStats() {
-      let now = new Date();
-      let start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      // Start at the first Sunday at least 39 weeks (~9 months) ago. 273
-      start.setDate(start.getDate() - 365);
-      start.setDate(start.getDate() - start.getDay());
       // this.stats = await this.historyClient.getStats(+start);
       // debugger;
       this.stats = await this.historyClient.getStats2();
-      // this.historyStart = start;
+      this.currentYear = new Date().getFullYear().toString();
+      // Get the first day of current year
+      this.historyStart = new Date(new Date().getFullYear(), 0, 1);
+      // Get the first day of next year
+      this.historyEnd = new Date(new Date().getFullYear() + 1, 0, 1);
     },
   },
   filters: {
