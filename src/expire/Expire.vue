@@ -88,7 +88,7 @@ body {
     }
   }
   &.focus {
-    background: #d00;
+    background: #32b86a;
     box-shadow: 0 15px 8px -10px #bb000055;
     color: #fff;
     &:hover {
