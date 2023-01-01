@@ -3,7 +3,6 @@ import StorageManager from './StorageManager';
 import RLE from './RLE';
 import Mutex from '../Mutex';
 import M from '../Messages';
-// import * as firebase from 'firebase/app';
 import { ref, set, onValue } from "firebase/database";
 import 'firebase/database';
 
@@ -13,7 +12,7 @@ class History
     this.storage = new StorageManager(new HistorySchema(), Chrome.storage.local);
     this.mutex = new Mutex();
     this.db = db;
-    this.ref = ref(db, `pomodoros/work/${new Date().getFullYear().toString()}`);
+    this.ref = ref(db, `pomodoros/personal/${new Date().getFullYear().toString()}`);
     this.pomodoros = {};
   }
 
