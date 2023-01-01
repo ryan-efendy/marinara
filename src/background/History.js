@@ -3,7 +3,6 @@ import StorageManager from './StorageManager';
 import RLE from './RLE';
 import Mutex from '../Mutex';
 import M from '../Messages';
-// import * as firebase from 'firebase/app';
 import { ref, set, onValue } from "firebase/database";
 import 'firebase/database';
 
