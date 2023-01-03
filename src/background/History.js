@@ -356,9 +356,16 @@ class History
   countSinceThisWeek(pomodoros) {
     if (!pomodoros) return 0;
 
+    let getMondayOfCurrentWeek = () => {
+      const today = new Date();
+      const first = today.getDate() - today.getDay() + 1;
+    
+      const monday = new Date(today.setDate(first));
+      return monday;
+    }
+
     let daysInWeek = [];
-    let d = new Date();
-    d.setDate(d.getDate() - d.getDay());
+    let d = getMondayOfCurrentWeek();
     d.setHours(0);
     d.setMinutes(0);
     d.setSeconds(0);
