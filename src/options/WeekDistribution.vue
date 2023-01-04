@@ -12,10 +12,12 @@ import 'tippy.js/dist/tippy.css';
 
 function createWeekDistribution(el, data) {
   let buckets = {};
-  for (let date of data) {
-    let day = new Date(date).getDay();
-    buckets[day] = buckets[day] || 0;
-    buckets[day]++;
+  for (const key in data) {
+    let day = new Date(+key).getDay();
+    if (!(day in buckets)) {
+      buckets[day] = 0;
+    }
+    buckets[day] += data[+key];
   }
 
   let max = Math.max(...Object.values(buckets));
