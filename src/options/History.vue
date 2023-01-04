@@ -45,13 +45,13 @@
       <DayDistribution v-if="stats.total > 0" :pomodoros="stats.pomodoros" :bucketSize="dayDistributionBucketSize" key="chart"></DayDistribution>
       <div v-else class="empty" key="empty">{{ M.daily_empty_placeholder }}</div>
     </section>-->
-    <!-- <section class="chart">
+    <section class="chart">
       <div class="title">
         <h2>{{ M.weekly_distribution }}</h2>
       </div>
       <WeekDistribution v-if="stats.total > 0" :pomodoros="stats.pomodoros" key="chart"></WeekDistribution>
       <div v-else class="empty" key="empty">{{ M.weekly_empty_placeholder }}</div>
-    </section>-->
+    </section>
     <section class="chart">
       <div class="title">
         <h2
