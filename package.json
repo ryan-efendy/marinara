@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "d3": "^5.0.0",
+    "date-fns": "^2.29.3",
     "events": "^3.0.0",
     "firebase": "^9.15.0",
     "tippy.js": "^3.2.0",
