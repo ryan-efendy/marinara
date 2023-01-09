@@ -5,6 +5,9 @@ import Mutex from '../Mutex';
 import M from '../Messages';
 import { ref, set, onValue } from "firebase/database";
 import 'firebase/database';
+import startOfWeek from 'date-fns/startOfWeek';
+import startOfDay from 'date-fns/startOfDay';
+import startOfMonth from 'date-fns/startOfMonth';
 
 class History
 {
@@ -344,11 +347,7 @@ class History
   countSinceToday(pomodoros) {
     if (!pomodoros) return 0;
 
-    let today = new Date();
-    today.setHours(0);
-    today.setMinutes(0);
-    today.setSeconds(0);
-    today.setMilliseconds(0);
+    let today = startOfDay(new Date());
 
     return +today in pomodoros ? pomodoros[+today] : 0;
   }
@@ -356,20 +355,8 @@ class History
   countSinceThisWeek(pomodoros) {
     if (!pomodoros) return 0;
 
-    let getMondayOfCurrentWeek = () => {
-      const today = new Date();
-      const first = today.getDate() - today.getDay() + 1;
-    
-      const monday = new Date(today.setDate(first));
-      return monday;
-    }
-
     let daysInWeek = [];
-    let d = getMondayOfCurrentWeek();
-    d.setHours(0);
-    d.setMinutes(0);
-    d.setSeconds(0);
-    d.setMilliseconds(0);
+    let d = startOfWeek(new Date(), { weekStartsOn: 1 });
 
     for (let i = 0; i < 7; i++) {
       daysInWeek.push(+d);
@@ -388,15 +375,10 @@ class History
     if (!pomodoros) return 0;
 
     let dateInMonth = [];
-    let d = new Date();
-    d.setDate(1);
-    d.setHours(0);
-    d.setMinutes(0);
-    d.setSeconds(0);
-    d.setMilliseconds(0);
+    let d = startOfMonth(new Date());
     
-    let lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-    let daysInMonth = lastDay.getDate()
+    let lastDayOfTheMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    let daysInMonth = lastDayOfTheMonth.getDate()
 
     for (let i = 0; i < daysInMonth; i++) {
       dateInMonth.push(+d);
