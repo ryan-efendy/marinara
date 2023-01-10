@@ -54,6 +54,13 @@
     </section>
     <section class="chart">
       <div class="title">
+        <h2>Monthly Distribution</h2>
+      </div>
+      <MonthDistribution v-if="stats.total > 0" :pomodoros="stats.pomodoros" key="chart"></MonthDistribution>
+      <div v-else class="empty" key="empty">{{ M.weekly_empty_placeholder }}</div>
+    </section>
+    <section class="chart">
+      <div class="title">
         <h2
           v-if="stats && stats.pomodoros && Object.keys(stats.pomodoros).length"
         >{{ Object.values(stats.pomodoros).reduce((acc, val) => acc + val) }} Pomodoros in {{ this.currentYear }} </h2>
@@ -241,6 +248,7 @@ import * as File from "./File";
 import Heatmap from "./Heatmap";
 import DayDistribution from "./DayDistribution";
 import WeekDistribution from "./WeekDistribution";
+import MonthDistribution from "./MonthDistribution";
 import M from "../Messages";
 
 export default {
@@ -332,6 +340,7 @@ export default {
     Heatmap,
     DayDistribution,
     WeekDistribution,
+    MonthDistribution,
   },
 };
 </script>
