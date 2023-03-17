@@ -9,6 +9,23 @@ import M from '../Messages';
 import { pomodoroCount } from '../Filters';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
+import { differenceInCalendarDays, eachDayOfInterval, startOfDay } from 'date-fns';
+
+function countDays(startDate, currentDate) {
+  const dayCounts = Array(7).fill(0);
+  const interval = { start: startDate, end: currentDate };
+  const days = eachDayOfInterval(interval);
+
+  days.forEach(day => {
+    dayCounts[day.getDay()]++;
+  });
+
+  return dayCounts;
+}
+
+function calculateProportionalCounts(dayCounts, buckets) {
+  return dayCounts.map((count, i) => buckets[i] / count);
+}
 
 function createWeekDistribution(el, data) {
   let buckets = {};
@@ -20,7 +37,12 @@ function createWeekDistribution(el, data) {
     buckets[day] += data[+key];
   }
 
-  let max = Math.max(...Object.values(buckets));
+  const startDate = new Date(2023, 0, 1);
+  const currentDate = startOfDay(new Date());
+  const dayCounts = countDays(startDate, currentDate);
+
+  const proportionalCounts = calculateProportionalCounts(dayCounts, buckets);
+  const maxProportional = Math.max(...proportionalCounts);
 
   const width = 600;
   const height = 150;
@@ -36,16 +58,16 @@ function createWeekDistribution(el, data) {
     .attr('class', 'distribution');
 
   let x = d3.scaleBand().domain(d3.range(0, 7)).rangeRound([0, width - pad]).padding(0.5);
-  let y = d3.scaleLinear().domain([0, max]).range([height - 30, 0]);
+  let y = d3.scaleLinear().domain([0, maxProportional]).range([height - 30, 0]);
 
   let xAxis = d3.axisBottom(x)
     .tickSize(5)
     .tickFormat(t => shortDays[t]);
 
-  let step = Math.max(max / 4, 1);
+  let step = Math.max(maxProportional / 4, 1);
   let yAxis = d3.axisLeft(y)
     .tickSize(3)
-    .tickValues(d3.range(0, max + step, step))
+    .tickValues(d3.range(0, maxProportional + step, step))
     .tickFormat(t => Math.floor(t));
 
   svg.append('g')
@@ -56,7 +78,7 @@ function createWeekDistribution(el, data) {
     .attr('transform', `translate(${pad},10)`)
     .call(yAxis);
 
-  svg.append('g')
+    svg.append('g')
     .attr('transform', `translate(${pad},10)`)
     .selectAll('rect')
     .data(Object.keys(buckets))
@@ -64,12 +86,13 @@ function createWeekDistribution(el, data) {
     .append('rect')
       .datum(d => +d)
       .attr('data-tippy-content', d => {
-        return M.weekly_tooltip(`<strong>${pomodoroCount(buckets[d])}</strong>`, days[d]);
+        return M.weekly_tooltip(`<strong>${pomodoroCount(proportionalCounts[d])}</strong>`, days[d]);
       })
       .attr('x', d => x(d))
-      .attr('y', d => y(buckets[d]))
+      .attr('y', d => y(proportionalCounts[d])) // Use proportionalCounts instead of buckets
       .attr('width', x.bandwidth())
-      .attr('height', d => (height - 30) - y(buckets[d]));
+      .attr('height', d => (height - 30) - y(proportionalCounts[d])); // Use proportionalCounts instead of buckets
+
 
   let tooltips = tippy(el.querySelectorAll('rect'), {
     arrow: true,
