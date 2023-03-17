@@ -18,7 +18,7 @@ function strftime(value, format) {
 
 function pomodoroCount(pomodoros) {
   if (!pomodoros) return M.pomodoro_count_zero;
-  
+
   if (Number.isInteger(pomodoros)) {
     if (pomodoros === 0) {
       return M.pomodoro_count_zero;
@@ -27,6 +27,8 @@ function pomodoroCount(pomodoros) {
     } else {
       return M.pomodoro_count_many(pomodoros.toLocaleString());
     }
+  } else if (!isNaN(pomodoros)) { // Handle the float case
+    return `${pomodoros.toFixed(1)} Pomodoros`;
   }
 
   if (!Object.keys(pomodoros).length) return M.pomodoro_count_zero;
@@ -41,7 +43,7 @@ function pomodoroCount(pomodoros) {
       return M.pomodoro_count_many(count.toLocaleString());
     }
   }
-  
+
   return M.pomodoro_count_zero;
 }
 
