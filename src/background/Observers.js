@@ -341,6 +341,48 @@ class TraceObserver
   }
 }
 
+class IdleTimerObserver {
+  constructor() {
+    this.timeoutID = null;
+  }
+
+  resetIdleTimer() {
+    if (this.timeoutID) {
+      clearTimeout(this.timeoutID);
+      this.timeoutID = null;
+    }
+  }
+
+  startIdleTimer() {
+    this.resetIdleTimer();
+    this.timeoutID = setTimeout(() => this.showIdleNotification(), 0.1 * 60 * 1000);
+  }
+
+  showIdleNotification() {
+    const title = 'Marinara';
+    const message = 'timer is not running';
+
+    const idleNotification = new Notification(title, message, () => this.timer.start());
+    idleNotification.show();
+  }
+
+  onStart() {
+    this.resetIdleTimer();
+  }
+
+  onStop() {
+    this.startIdleTimer();
+  }
+
+  onPause() {
+    this.startIdleTimer();
+  }
+
+  onResume() {
+    this.resetIdleTimer();
+  }
+}
+
 export {
   BadgeObserver,
   TimerSoundObserver,
@@ -349,5 +391,6 @@ export {
   HistoryObserver,
   CountdownObserver,
   MenuObserver,
-  TraceObserver
+  TraceObserver,
+  IdleTimerObserver
 };
