@@ -134,8 +134,12 @@ class StartFocusingAction extends Action
     return true;
   }
 
-  run() {
+  async run() {
     this.timer.startFocus();
+    // Get focus duration from settings
+    const focusDuration = this.timer.settings.focus.duration;
+    // Open the new tab with the dynamic duration
+    chrome.tabs.create({ url: `focus://focus?minutes=${focusDuration}` });
   }
 }
 
