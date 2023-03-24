@@ -114,6 +114,8 @@ class PomodoroService extends Service
   }
 
   async startFocus() {
+    const focusDuration = this.timer.settings.focus.duration;
+    chrome.tabs.create({ url: `focus://focus?minutes=${focusDuration}` });
     this.timer.startFocus();
   }
 
