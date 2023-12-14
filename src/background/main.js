@@ -5,7 +5,7 @@ import { History } from './History';
 import StorageManager from './StorageManager';
 import { SettingsSchema, PersistentSettings } from './Settings';
 import { HistoryService, SoundsService, SettingsService, PomodoroService, OptionsService } from './Services';
-import { BadgeObserver, TimerSoundObserver, ExpirationSoundObserver, NotificationObserver, HistoryObserver, CountdownObserver, MenuObserver, IdleTimerObserver } from './Observers';
+import { BadgeObserver, TimerSoundObserver, ExpirationSoundObserver, NotificationObserver, HistoryObserver, CountdownObserver, MenuObserver } from './Observers';
 import { ServiceBroker } from '../Service';
 import * as Alarms from './Alarms';
 import { initializeApp } from "firebase/app";
@@ -47,7 +47,6 @@ async function run() {
   timer.observe(new TimerSoundObserver(settings));
   timer.observe(new CountdownObserver(settings));
   timer.observe(new MenuObserver(menu));
-  timer.observe(new IdleTimerObserver());
 
   menu.apply();
   settingsManager.on('change', () => menu.apply());
