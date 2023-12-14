@@ -4,7 +4,7 @@
     <div class="stats">
       <div class="stat">
         <div>
-          <div class="value" style="display: contents;">{{ stats.day | integer }}</div>
+          <div class="value" v-bind:style="{ color: (stats.day >= 12) ? 'green' : 'black' }" style="display: contents;">{{ stats.day | integer }}</div>
           <div class="value" style="display: contents;color: darkgrey;">/12</div>
         </div>
         <div class="bucket">{{ M.today }}</div>
@@ -12,8 +12,8 @@
       </div>
       <div class="stat">
         <div>
-          <div class="value" style="display: contents;">{{ stats.week | integer }}</div>
-          <div class="value" style="display: contents;color: darkgrey;">/60</div>
+          <div class="value" v-bind:style="{ color: (stats.day >= 65) ? 'green' : 'black' }" style="display: contents;">{{ stats.week | integer }}</div>
+          <div class="value" style="display: contents;color: darkgrey;">/65</div>
         </div>
         <div class="bucket">{{ M.this_week }}</div>
         <div class="average">{{ stats.weekAverage | float(2) | average_stat }}</div>
