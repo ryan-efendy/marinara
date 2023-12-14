@@ -4,8 +4,8 @@
     <div class="stats">
       <div class="stat">
         <div>
-          <div class="value" v-bind:style="{ color: (stats.day >= 13) ? 'green' : 'black' }" style="display: contents;">{{ stats.day | integer }}</div>
-          <div class="value" style="display: contents;color: darkgrey;">/13</div>
+          <div class="value" v-bind:style="{ color: (stats.day >= 12) ? 'green' : 'black' }" style="display: contents;">{{ stats.day | integer }}</div>
+          <div class="value" style="display: contents;color: darkgrey;">/12</div>
         </div>
         <div class="bucket">{{ M.today }}</div>
         <div class="average">{{ stats.dayAverage | float(2) | average_stat }}</div>
